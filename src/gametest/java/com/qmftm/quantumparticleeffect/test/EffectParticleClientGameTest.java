@@ -5,9 +5,8 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 
 /**
- * Puts three mobs in front of the player and saves a screenshot:
- * poison (left) and regeneration (middle) use this mod's textures,
- * haste (right) has no texture file and should keep the vanilla look.
+ * Puts three mobs in front of the player and saves a screenshot.
+ * Poison (left), regeneration (middle) and haste (right) should show their inventory icons.
  */
 public class EffectParticleClientGameTest implements FabricClientGameTest {
 	@Override

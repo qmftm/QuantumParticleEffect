@@ -13,21 +13,29 @@ import net.minecraft.world.effect.MobEffect;
 import org.jspecify.annotations.Nullable;
 
 /**
- * One sprite set per mob effect.
+ * Picks the particle textures for each mob effect.
  *
- * For an effect like {@code minecraft:poison} we register the particle id
- * {@code minecraft:effect/poison}. The game then loads its textures from
- * {@code assets/minecraft/particles/effect/poison.json}, the same way it loads
- * vanilla particles. Effects without such a file keep the vanilla look.
+ * 1. If a resource pack has {@code assets/<ns>/particles/effect/<name>.json}, its textures are used
+ *    and tinted with the effect color, like vanilla particles.
+ * 2. Otherwise the effect's inventory icon ({@code textures/mob_effect/<name>.png}) is used in its own
+ *    colors. Effects from other mods work too, as long as they ship an icon.
+ * 3. Otherwise the vanilla particle is used.
  *
  * Only the effect's color is sent to clients, so the effect is found by color.
  */
 public final class EffectSprites {
 	private static final String MUTABLE_SPRITE_SET = "net.minecraft.client.particle.ParticleResources$MutableSpriteSet";
 
-	/** Effect color (RGB) -> sprite set. */
-	private static final Int2ObjectMap<SpriteSet> BY_COLOR = new Int2ObjectOpenHashMap<>();
+	/** Effect color (RGB) -> textures for that effect. */
+	private static final Int2ObjectMap<Entry> BY_COLOR = new Int2ObjectOpenHashMap<>();
 	private static final Map<Identifier, SpriteSet> BY_PARTICLE_ID = new HashMap<>();
+
+	/** The textures to use, and whether to tint them with the effect color. */
+	public record Match(SpriteSet sprites, boolean tint) {
+	}
+
+	private record Entry(SpriteSet custom, IconSpriteSet icon) {
+	}
 
 	private EffectSprites() {
 	}
@@ -62,7 +70,7 @@ public final class EffectSprites {
 			spriteSets.put(particleId, set);
 			BY_PARTICLE_ID.put(particleId, set);
 			// Two effects can share a color (e.g. instant_health and saturation); the first one wins.
-			BY_COLOR.putIfAbsent(effect.getColor() & 0xFFFFFF, set);
+			BY_COLOR.putIfAbsent(effect.getColor() & 0xFFFFFF, new Entry(set, new IconSpriteSet(effectId)));
 		}
 	}
 
@@ -73,12 +81,18 @@ public final class EffectSprites {
 		}
 	}
 
-	/** Returns the custom sprite set for this particle color, or null to use the vanilla one. */
-	public static @Nullable SpriteSet forColor(int argb) {
-		SpriteSet set = BY_COLOR.get(argb & 0xFFFFFF);
-		if (set == null || ((MutableSpriteSetAccessor) set).quantumparticleeffect$getSprites() == null) {
+	/** Returns the textures for this particle color, or null to use the vanilla particle. */
+	public static @Nullable Match forColor(int argb) {
+		Entry entry = BY_COLOR.get(argb & 0xFFFFFF);
+		if (entry == null) {
 			return null;
 		}
-		return set;
+		if (((MutableSpriteSetAccessor) entry.custom()).quantumparticleeffect$getSprites() != null) {
+			return new Match(entry.custom(), true);
+		}
+		if (entry.icon().exists()) {
+			return new Match(entry.icon(), false);
+		}
+		return null;
 	}
 }

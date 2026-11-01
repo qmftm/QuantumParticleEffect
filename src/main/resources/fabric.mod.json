@@ -3,7 +3,7 @@
 	"id": "quantumparticleeffect",
 	"version": "${version}",
 	"name": "Quantum Particle Effect",
-	"description": "Gives each potion effect its own particle texture. Textures can be replaced with a resource pack.",
+	"description": "Shows each potion effect's inventory icon as its particle. Works with effects from other mods.",
 	"authors": [
 		"qmftm"
 	],
