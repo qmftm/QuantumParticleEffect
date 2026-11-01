@@ -74,19 +74,39 @@ jar {
 	}
 }
 
-// configure the maven publication
+// Maven publishing. GitHub Actions runs `./gradlew publish` when a GitHub release is published
+// (see .github/workflows/publish.yml). Run `./gradlew publishToMavenLocal` to test locally.
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
+			artifactId = "quantumparticleeffect"
 			from components.java
+
+			pom {
+				name = "Quantum Particle Effect"
+				description = "Gives each potion effect its own particle texture."
+				url = "https://github.com/qmftm/QuantumParticleEffect"
+				licenses {
+					license {
+						name = "CC0-1.0"
+						url = "https://creativecommons.org/publicdomain/zero/1.0/"
+					}
+				}
+				scm {
+					url = "https://github.com/qmftm/QuantumParticleEffect"
+				}
+			}
 		}
 	}
 
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
 	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
+		maven {
+			name = "GitHubPackages"
+			url = "https://maven.pkg.github.com/qmftm/QuantumParticleEffect"
+			credentials {
+				username = System.getenv("GITHUB_ACTOR")
+				password = System.getenv("GITHUB_TOKEN")
+			}
+		}
 	}
 }
