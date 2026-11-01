@@ -1,0 +1,12 @@
+{
+	"schemaVersion": 1,
+	"id": "quantumparticleeffect-test",
+	"version": "1.0.0",
+	"name": "Quantum Particle Effect Tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"com.qmftm.quantumparticleeffect.test.EffectParticleClientGameTest"
+		]
+	}
+}

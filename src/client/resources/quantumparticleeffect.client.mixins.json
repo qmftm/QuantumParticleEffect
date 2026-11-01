@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "com.qmftm.quantumparticleeffect.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"ColorParticleOptionAccessor",
+		"MobEffectProviderMixin",
+		"MutableSpriteSetAccessor",
+		"ParticleResourcesMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

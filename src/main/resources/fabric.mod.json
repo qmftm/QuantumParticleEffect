@@ -1,0 +1,32 @@
+{
+	"schemaVersion": 1,
+	"id": "quantumparticleeffect",
+	"version": "${version}",
+	"name": "Quantum Particle Effect",
+	"description": "Gives each potion effect its own particle texture. Textures can be replaced with a resource pack.",
+	"authors": [
+		"qmftm"
+	],
+	"contact": {
+		"sources": "https://github.com/qmftm/QuantumParticleEffect"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/quantumparticleeffect/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.qmftm.quantumparticleeffect.QuantumParticleEffectClient"
+		]
+	},
+	"mixins": [
+		{
+			"config": "quantumparticleeffect.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.3",
+		"java": ">=25"
+	}
+}
