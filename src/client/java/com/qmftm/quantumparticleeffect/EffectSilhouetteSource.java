@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 
 /**
  * Atlas sprite source that turns every effect inventory icon ({@code textures/mob_effect/<name>.png},
- * from vanilla or any mod) into a small pixel silhouette, like the trial/raid omen particles.
+ * from vanilla or any mod) into a pixel silhouette at the icon's own resolution, like the trial/raid omen particles.
  *
  * The result uses four shades of gray (from the icon's brightness) so the game can tint it with the effect color.
  * Sprite id: {@code <ns>:effect_silhouette/<name>}.
@@ -32,8 +32,6 @@ public final class EffectSilhouetteSource implements SpriteSource {
 	public static final MapCodec<EffectSilhouetteSource> MAP_CODEC = MapCodec.unit(EffectSilhouetteSource::new);
 	public static final String PREFIX = "effect_silhouette/";
 
-	/** Output size in pixels. Vanilla icons are 18x18, so this halves them. */
-	private static final int SIZE = 9;
 	/** Gray shades from darkest to brightest. Each gets about a quarter of the filled pixels. */
 	private static final int[] SHADES = {
 		ARGB.color(255, 150, 150, 150),
@@ -60,7 +58,7 @@ public final class EffectSilhouetteSource implements SpriteSource {
 	private static @Nullable SpriteContents load(Identifier id, Resource resource) {
 		try (InputStream in = resource.open(); NativeImage icon = NativeImage.read(in)) {
 			NativeImage out = silhouette(icon);
-			return new SpriteContents(id, new FrameSize(SIZE, SIZE), out);
+			return new SpriteContents(id, new FrameSize(out.getWidth(), out.getHeight()), out);
 		} catch (IOException e) {
 			LOGGER.warn("Could not make effect particle from {}", id, e);
 			return null;
@@ -72,31 +70,18 @@ public final class EffectSilhouetteSource implements SpriteSource {
 		// Animated icons are a vertical strip of square frames; use the first one.
 		int height = Math.min(icon.getHeight(), width);
 
-		NativeImage out = new NativeImage(SIZE, SIZE, true);
-		float[] brightness = new float[SIZE * SIZE];
+		NativeImage out = new NativeImage(width, height, true);
+		float[] brightness = new float[width * height];
 		Arrays.fill(brightness, -1.0F);
 		List<Float> filled = new ArrayList<>();
 
-		for (int y = 0; y < SIZE; y++) {
-			for (int x = 0; x < SIZE; x++) {
-				int x0 = x * width / SIZE, x1 = Math.max(x0 + 1, (x + 1) * width / SIZE);
-				int y0 = y * height / SIZE, y1 = Math.max(y0 + 1, (y + 1) * height / SIZE);
-				int total = 0, opaque = 0;
-				float sum = 0;
-				for (int py = y0; py < y1; py++) {
-					for (int px = x0; px < x1; px++) {
-						int c = icon.getPixel(px, py);
-						total++;
-						if (ARGB.alpha(c) > 127) {
-							opaque++;
-							sum += 0.299F * ARGB.red(c) + 0.587F * ARGB.green(c) + 0.114F * ARGB.blue(c);
-						}
-					}
-				}
-				// A cell is filled when at least half of it is covered.
-				if (opaque * 2 >= total) {
-					brightness[x + y * SIZE] = sum / opaque;
-					filled.add(sum / opaque);
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				int c = icon.getPixel(x, y);
+				if (ARGB.alpha(c) > 127) {
+					float value = 0.299F * ARGB.red(c) + 0.587F * ARGB.green(c) + 0.114F * ARGB.blue(c);
+					brightness[x + y * width] = value;
+					filled.add(value);
 				}
 			}
 		}
@@ -117,7 +102,7 @@ public final class EffectSilhouetteSource implements SpriteSource {
 						shade++;
 					}
 				}
-				out.setPixel(i % SIZE, i / SIZE, SHADES[shade]);
+				out.setPixel(i % width, i / width, SHADES[shade]);
 			}
 		}
 		return out;
