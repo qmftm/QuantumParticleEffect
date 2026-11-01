@@ -5,8 +5,9 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 
 /**
- * Puts three mobs in front of the player and saves a screenshot.
- * Poison (left), regeneration (middle) and haste (right) should show their inventory icons.
+ * Puts four mobs in front of the player and saves a screenshot. From left to right:
+ * trial omen (vanilla, for comparison), poison, regeneration and haste.
+ * The last three should show small silhouettes of their icons in the effect color.
  */
 public class EffectParticleClientGameTest implements FabricClientGameTest {
 	@Override
@@ -17,9 +18,10 @@ public class EffectParticleClientGameTest implements FabricClientGameTest {
 			world.getServer().runCommand("gamerule advance_time false");
 			world.getServer().runCommand("execute as @a run tp @s ~ ~ ~ 0 10");
 			context.waitTicks(10);
-			summon(world, "1.5", "minecraft:poison");
-			summon(world, "0", "minecraft:regeneration");
-			summon(world, "-1.5", "minecraft:haste");
+			summon(world, "2.25", "minecraft:trial_omen");
+			summon(world, "0.75", "minecraft:poison");
+			summon(world, "-0.75", "minecraft:regeneration");
+			summon(world, "-2.25", "minecraft:haste");
 			context.waitTicks(60);
 			context.takeScreenshot("effect_particles");
 		}

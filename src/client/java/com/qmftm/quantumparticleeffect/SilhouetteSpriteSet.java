@@ -8,15 +8,12 @@ import net.minecraft.data.AtlasIds;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 
-/**
- * A single-sprite set showing an effect's inventory icon ({@code textures/mob_effect/<name>.png}).
- * The icons are added to the particle atlas by {@code assets/minecraft/atlases/particles.json}.
- */
-final class IconSpriteSet implements SpriteSet {
+/** The single silhouette sprite made from an effect's icon by {@link EffectSilhouetteSource}. */
+final class SilhouetteSpriteSet implements SpriteSet {
 	private final Identifier spriteId;
 
-	IconSpriteSet(Identifier effectId) {
-		this.spriteId = effectId.withPrefix("mob_effect/");
+	SilhouetteSpriteSet(Identifier effectId) {
+		this.spriteId = effectId.withPrefix(EffectSilhouetteSource.PREFIX);
 	}
 
 	/** False when the effect has no icon (the atlas would return its missing texture). */

@@ -1,9 +1,7 @@
 {
   "sources": [
     {
-      "type": "minecraft:directory",
-      "source": "mob_effect",
-      "prefix": "mob_effect/"
+      "type": "quantumparticleeffect:effect_silhouettes"
     }
   ]
 }

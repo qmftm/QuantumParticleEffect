@@ -3,7 +3,7 @@
 	"id": "quantumparticleeffect",
 	"version": "${version}",
 	"name": "Quantum Particle Effect",
-	"description": "Shows each potion effect's inventory icon as its particle. Works with effects from other mods.",
+	"description": "Potion effect particles shaped like each effect's icon, in the effect color (like the omen particles). Works with effects from other mods.",
 	"authors": [
 		"qmftm"
 	],

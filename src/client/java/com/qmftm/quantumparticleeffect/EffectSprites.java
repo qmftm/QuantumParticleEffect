@@ -15,11 +15,12 @@ import org.jspecify.annotations.Nullable;
 /**
  * Picks the particle textures for each mob effect.
  *
- * 1. If a resource pack has {@code assets/<ns>/particles/effect/<name>.json}, its textures are used
- *    and tinted with the effect color, like vanilla particles.
- * 2. Otherwise the effect's inventory icon ({@code textures/mob_effect/<name>.png}) is used in its own
- *    colors. Effects from other mods work too, as long as they ship an icon.
+ * 1. If a resource pack has {@code assets/<ns>/particles/effect/<name>.json}, its textures are used.
+ * 2. Otherwise a small silhouette made from the effect's inventory icon is used
+ *    (see {@link EffectSilhouetteSource}). Effects from other mods work too, as long as they ship an icon.
  * 3. Otherwise the vanilla particle is used.
+ *
+ * Both are tinted with the effect color, like the trial/raid omen particles.
  *
  * Only the effect's color is sent to clients, so the effect is found by color.
  */
@@ -30,11 +31,7 @@ public final class EffectSprites {
 	private static final Int2ObjectMap<Entry> BY_COLOR = new Int2ObjectOpenHashMap<>();
 	private static final Map<Identifier, SpriteSet> BY_PARTICLE_ID = new HashMap<>();
 
-	/** The textures to use, and whether to tint them with the effect color. */
-	public record Match(SpriteSet sprites, boolean tint) {
-	}
-
-	private record Entry(SpriteSet custom, IconSpriteSet icon) {
+	private record Entry(SpriteSet custom, SilhouetteSpriteSet silhouette) {
 	}
 
 	private EffectSprites() {
@@ -70,7 +67,7 @@ public final class EffectSprites {
 			spriteSets.put(particleId, set);
 			BY_PARTICLE_ID.put(particleId, set);
 			// Two effects can share a color (e.g. instant_health and saturation); the first one wins.
-			BY_COLOR.putIfAbsent(effect.getColor() & 0xFFFFFF, new Entry(set, new IconSpriteSet(effectId)));
+			BY_COLOR.putIfAbsent(effect.getColor() & 0xFFFFFF, new Entry(set, new SilhouetteSpriteSet(effectId)));
 		}
 	}
 
@@ -82,16 +79,16 @@ public final class EffectSprites {
 	}
 
 	/** Returns the textures for this particle color, or null to use the vanilla particle. */
-	public static @Nullable Match forColor(int argb) {
+	public static @Nullable SpriteSet forColor(int argb) {
 		Entry entry = BY_COLOR.get(argb & 0xFFFFFF);
 		if (entry == null) {
 			return null;
 		}
 		if (((MutableSpriteSetAccessor) entry.custom()).quantumparticleeffect$getSprites() != null) {
-			return new Match(entry.custom(), true);
+			return entry.custom();
 		}
-		if (entry.icon().exists()) {
-			return new Match(entry.icon(), false);
+		if (entry.silhouette().exists()) {
+			return entry.silhouette();
 		}
 		return null;
 	}

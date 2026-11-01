@@ -6,6 +6,7 @@
 		"ColorParticleOptionAccessor",
 		"MobEffectProviderMixin",
 		"MutableSpriteSetAccessor",
+		"SpriteSourcesMixin",
 		"ParticleResourcesMixin"
 	],
 	"injectors": {
