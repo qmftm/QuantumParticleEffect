@@ -23,7 +23,7 @@ import org.slf4j.Logger;
  * Atlas sprite source that turns every effect inventory icon ({@code textures/mob_effect/<name>.png},
  * from vanilla or any mod) into a pixel silhouette at the icon's own resolution, like the trial/raid omen particles.
  *
- * The result uses the four grays of the vanilla effect particles (from the icon's brightness) so the game can tint it with the effect color.
+ * The result uses four grays chosen from each pixel's brightness relative to the rest of the icon so the game can tint it with the effect color.
  * Sprite id: {@code <ns>:effect_silhouette/<name>}.
  */
 public final class EffectSilhouetteSource implements SpriteSource {
@@ -32,22 +32,21 @@ public final class EffectSilhouetteSource implements SpriteSource {
 	public static final MapCodec<EffectSilhouetteSource> MAP_CODEC = MapCodec.unit(EffectSilhouetteSource::new);
 	public static final String PREFIX = "effect_silhouette/";
 
-	/**
-	 * The four gray shades the vanilla effect particle textures use, from darkest to brightest.
-	 * The brightest shade shows the exact effect color.
-	 */
+	/** Four gray shades from darkest to brightest. The brightest shows the exact effect color. */
 	private static final int[] SHADES = {
-		ARGB.color(255, 146, 146, 146),
-		ARGB.color(255, 179, 179, 179),
-		ARGB.color(255, 213, 213, 213),
+		ARGB.color(255, 115, 115, 115),
+		ARGB.color(255, 165, 165, 165),
+		ARGB.color(255, 215, 215, 215),
 		ARGB.color(255, 255, 255, 255)
 	};
 	/**
-	 * Share of filled pixels that get each shade at most, darkest first.
-	 * Half of the pixels are fully bright, so the average brightness (about 222)
-	 * is close to the vanilla textures (about 230).
+	 * A pixel gets the next brighter shade when it reaches this fraction of the icon's own brightness range
+	 * (darkest to brightest pixel). Using the icon's range instead of fixed values keeps small details,
+	 * like the eyes of the poison skull, visible on dark and bright icons alike.
 	 */
-	private static final float[] SHARES = {0.10F, 0.15F, 0.25F, 0.50F};
+	private static final float[] THRESHOLDS = {0.18F, 0.38F, 0.58F};
+	/** Ignore this share of the darkest and brightest pixels when finding the range, so a single highlight does not flatten the icon. */
+	private static final float RANGE_CLIP = 0.02F;
 
 	private static final FileToIdConverter ICONS = new FileToIdConverter("textures/mob_effect", ".png");
 
@@ -99,17 +98,14 @@ public final class EffectSilhouetteSource implements SpriteSource {
 			return out;
 		}
 		filled.sort(null);
-		float[] cuts = new float[SHADES.length - 1];
-		float used = 0;
-		for (int k = 0; k < cuts.length; k++) {
-			used += SHARES[k];
-			cuts[k] = filled.get(Math.min(filled.size() - 1, (int) (filled.size() * used)));
-		}
+		float low = filled.get((int) (filled.size() * RANGE_CLIP));
+		float high = filled.get(Math.min(filled.size() - 1, (int) (filled.size() * (1.0F - RANGE_CLIP))));
+		float span = Math.max(high - low, 1.0F);
 		for (int i = 0; i < brightness.length; i++) {
 			if (brightness[i] >= 0) {
 				int shade = 0;
-				for (float cut : cuts) {
-					if (brightness[i] >= cut) {
+				for (float threshold : THRESHOLDS) {
+					if ((brightness[i] - low) / span >= threshold) {
 						shade++;
 					}
 				}
