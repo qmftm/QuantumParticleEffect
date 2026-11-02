@@ -40,12 +40,18 @@ public final class EffectSilhouetteSource implements SpriteSource {
 		ARGB.color(255, 255, 255, 255)
 	};
 	/**
-	 * A pixel gets the next brighter shade when it reaches this fraction of the icon's own brightness range
-	 * (darkest to brightest pixel). Using the icon's range instead of fixed values keeps small details,
-	 * like the eyes of the poison skull, visible on dark and bright icons alike.
+	 * Share of an icon's pixels that get the brightest shade (about 27%, which looks right for the poison skull).
+	 * Every icon is scaled to this, so effects look equally bright instead of depending on how
+	 * many bright pixels their icon happens to have.
 	 */
-	private static final float[] THRESHOLDS = {0.18F, 0.38F, 0.58F};
-	/** Ignore this share of the darkest and brightest pixels when finding the range, so a single highlight does not flatten the icon. */
+	private static final float BRIGHT_SHARE = 0.27F;
+	/**
+	 * A pixel gets the next brighter shade when it reaches this fraction of the way from the darkest pixel
+	 * to the brightness where the brightest shade starts. Measured from the icon itself, so small details,
+	 * like the eyes of the poison skull, stay visible on dark and bright icons alike.
+	 */
+	private static final float[] THRESHOLDS = {0.31F, 0.66F, 1.0F};
+	/** Ignore this share of the darkest pixels when finding the range, so a single dark pixel does not flatten the icon. */
 	private static final float RANGE_CLIP = 0.02F;
 
 	private static final FileToIdConverter ICONS = new FileToIdConverter("textures/mob_effect", ".png");
@@ -99,8 +105,8 @@ public final class EffectSilhouetteSource implements SpriteSource {
 		}
 		filled.sort(null);
 		float low = filled.get((int) (filled.size() * RANGE_CLIP));
-		float high = filled.get(Math.min(filled.size() - 1, (int) (filled.size() * (1.0F - RANGE_CLIP))));
-		float span = Math.max(high - low, 1.0F);
+		float brightStart = filled.get(Math.min(filled.size() - 1, (int) (filled.size() * (1.0F - BRIGHT_SHARE))));
+		float span = Math.max(brightStart - low, 1.0F);
 		for (int i = 0; i < brightness.length; i++) {
 			if (brightness[i] >= 0) {
 				int shade = 0;
