@@ -2,16 +2,21 @@ package com.qmftm.quantumparticleeffect.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.qmftm.quantumparticleeffect.EffectSprites;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SpellParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.ColorParticleOption;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /** Swaps in the effect's own textures when the particle's color matches a known effect. */
 @Mixin(SpellParticle.MobEffectProvider.class)
 public abstract class MobEffectProviderMixin {
+	private static final float SIZE_MULTIPLIER = 2.0F;
+
 	@ModifyArg(
 		method = "createParticle(Lnet/minecraft/core/particles/ColorParticleOption;Lnet/minecraft/client/multiplayer/ClientLevel;DDDDDDLnet/minecraft/util/RandomSource;)Lnet/minecraft/client/particle/Particle;",
 		at = @At(
@@ -23,6 +28,17 @@ public abstract class MobEffectProviderMixin {
 	private SpriteSet quantumparticleeffect$useEffectSprites(SpriteSet original, @Local(argsOnly = true) ColorParticleOption options) {
 		SpriteSet custom = EffectSprites.forColor(color(options));
 		return custom != null ? custom : original;
+	}
+
+	@Inject(
+		method = "createParticle(Lnet/minecraft/core/particles/ColorParticleOption;Lnet/minecraft/client/multiplayer/ClientLevel;DDDDDDLnet/minecraft/util/RandomSource;)Lnet/minecraft/client/particle/Particle;",
+		at = @At("RETURN")
+	)
+	private void quantumparticleeffect$enlarge(CallbackInfoReturnable<Particle> cir, @Local(argsOnly = true) ColorParticleOption options) {
+		// The effect textures are 18x18, twice the size of the vanilla 9x9 effect particle, so draw them twice as big.
+		if (EffectSprites.forColor(color(options)) != null) {
+			cir.getReturnValue().scale(SIZE_MULTIPLIER);
+		}
 	}
 
 	private static int color(ColorParticleOption options) {
