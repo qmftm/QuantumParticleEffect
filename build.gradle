@@ -4,6 +4,14 @@ plugins {
 }
 
 repositories {
+	// Mod Menu, only needed to compile the settings button. It is not required at runtime.
+	maven {
+		name = "TerraformersMC"
+		url = "https://maven.terraformersmc.com/releases/"
+		content {
+			includeGroup "com.terraformersmc"
+		}
+	}
 	// Add repositories to retrieve artifacts from in here.
 	// You should only use this when depending on other mods because
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
@@ -40,6 +48,11 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// Mod Menu API for the settings button. Optional: the mod works without Mod Menu.
+	clientCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}") {
+		transitive = false
+	}
 }
 
 processResources {

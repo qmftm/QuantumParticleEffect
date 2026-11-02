@@ -16,6 +16,9 @@
 	"entrypoints": {
 		"client": [
 			"com.qmftm.quantumparticleeffect.QuantumParticleEffectClient"
+		],
+		"modmenu": [
+			"com.qmftm.quantumparticleeffect.QpeModMenuIntegration"
 		]
 	},
 	"mixins": [

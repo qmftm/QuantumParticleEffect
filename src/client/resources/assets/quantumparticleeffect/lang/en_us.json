@@ -1,0 +1,5 @@
+{
+	"quantumparticleeffect.config.title": "Quantum Particle Effect",
+	"quantumparticleeffect.config.keep_special_particles": "Keep Special Effect Particles",
+	"quantumparticleeffect.config.keep_special_particles.tooltip": "Effects that already have their own particle, like Trial Omen, Raid Omen, Wind Charged, Oozing, Weaving and Infested, keep it. Turn off to use the icon particle for them too."
+}

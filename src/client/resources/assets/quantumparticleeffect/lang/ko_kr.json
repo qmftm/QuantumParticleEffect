@@ -1,0 +1,5 @@
+{
+	"quantumparticleeffect.config.title": "퀀텀 파티클 이펙트",
+	"quantumparticleeffect.config.keep_special_particles": "고유 파티클 효과 유지",
+	"quantumparticleeffect.config.keep_special_particles.tooltip": "시련의 징조, 습격의 징조, 풍압, 점액화, 거미줄 감김, 감염처럼 원래 자체 파티클이 있는 효과는 그 파티클을 그대로 써요. 끄면 이 효과들도 아이콘 파티클로 나와요."
+}

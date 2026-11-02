@@ -7,6 +7,7 @@ public class QuantumParticleEffectClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		// All work happens in mixins; see EffectSprites.
+		QpeConfig.load();
+		// The rest happens in mixins; see EffectSprites.
 	}
 }
