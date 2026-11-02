@@ -39,7 +39,24 @@ public class ConfigClientGameTest implements FabricClientGameTest {
 			context.waitTicks(120);
 			context.takeScreenshot("config_keep_off");
 
-			context.runOnClient(client -> client.gui.setScreen(new QpeConfigScreen(null)));
+			// Open the screen the way Mod Menu does: ask Mod Menu for this mod's settings screen.
+			context.runOnClient(client -> {
+				try {
+					Class<?> modMenu = Class.forName("com.terraformersmc.modmenu.ModMenu");
+					boolean has = (boolean) modMenu.getMethod("hasConfigScreen", String.class).invoke(null, "quantumparticleeffect");
+					if (!has) {
+						throw new AssertionError("Mod Menu does not know a settings screen for quantumparticleeffect");
+					}
+					Object screen = modMenu.getMethod("getConfigScreen", String.class, net.minecraft.client.gui.screens.Screen.class)
+						.invoke(null, "quantumparticleeffect", null);
+					if (!(screen instanceof QpeConfigScreen)) {
+						throw new AssertionError("Mod Menu returned " + screen);
+					}
+					client.gui.setScreen((QpeConfigScreen) screen);
+				} catch (ReflectiveOperationException e) {
+					throw new AssertionError(e);
+				}
+			});
 			context.waitTicks(10);
 			context.takeScreenshot("config_screen");
 			context.runOnClient(client -> client.gui.setScreen(null));

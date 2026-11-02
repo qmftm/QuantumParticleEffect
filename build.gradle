@@ -53,6 +53,8 @@ dependencies {
 	clientCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}") {
 		transitive = false
 	}
+	// Also run with Mod Menu in the development game, so the settings button can be tested.
+	localRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
 }
 
 processResources {
