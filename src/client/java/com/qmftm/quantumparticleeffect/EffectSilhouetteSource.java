@@ -23,7 +23,7 @@ import org.slf4j.Logger;
  * Atlas sprite source that turns every effect inventory icon ({@code textures/mob_effect/<name>.png},
  * from vanilla or any mod) into a pixel silhouette at the icon's own resolution, like the trial/raid omen particles.
  *
- * The result uses four shades of gray (from the icon's brightness) so the game can tint it with the effect color.
+ * The result uses the four grays of the vanilla effect particles (from the icon's brightness) so the game can tint it with the effect color.
  * Sprite id: {@code <ns>:effect_silhouette/<name>}.
  */
 public final class EffectSilhouetteSource implements SpriteSource {
@@ -32,13 +32,22 @@ public final class EffectSilhouetteSource implements SpriteSource {
 	public static final MapCodec<EffectSilhouetteSource> MAP_CODEC = MapCodec.unit(EffectSilhouetteSource::new);
 	public static final String PREFIX = "effect_silhouette/";
 
-	/** Gray shades from darkest to brightest. Each gets about a quarter of the filled pixels. */
+	/**
+	 * The four gray shades the vanilla effect particle textures use, from darkest to brightest.
+	 * The brightest shade shows the exact effect color.
+	 */
 	private static final int[] SHADES = {
-		ARGB.color(255, 150, 150, 150),
-		ARGB.color(255, 190, 190, 190),
-		ARGB.color(255, 225, 225, 225),
+		ARGB.color(255, 146, 146, 146),
+		ARGB.color(255, 179, 179, 179),
+		ARGB.color(255, 213, 213, 213),
 		ARGB.color(255, 255, 255, 255)
 	};
+	/**
+	 * Share of filled pixels that get each shade at most, darkest first.
+	 * Half of the pixels are fully bright, so the average brightness (about 222)
+	 * is close to the vanilla textures (about 230).
+	 */
+	private static final float[] SHARES = {0.10F, 0.15F, 0.25F, 0.50F};
 
 	private static final FileToIdConverter ICONS = new FileToIdConverter("textures/mob_effect", ".png");
 
@@ -91,8 +100,10 @@ public final class EffectSilhouetteSource implements SpriteSource {
 		}
 		filled.sort(null);
 		float[] cuts = new float[SHADES.length - 1];
+		float used = 0;
 		for (int k = 0; k < cuts.length; k++) {
-			cuts[k] = filled.get(filled.size() * (k + 1) / SHADES.length);
+			used += SHARES[k];
+			cuts[k] = filled.get(Math.min(filled.size() - 1, (int) (filled.size() * used)));
 		}
 		for (int i = 0; i < brightness.length; i++) {
 			if (brightness[i] >= 0) {
